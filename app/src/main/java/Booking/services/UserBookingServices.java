@@ -4,6 +4,7 @@ import Booking.Train;
 import Booking.User;
 import Booking.util.UserServiceUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
@@ -32,12 +33,14 @@ public class UserBookingServices {
     public UserBookingServices() throws IOException{
 
         File users = new File(USERS_PATH);
+
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         userList = objectMapper.readValue(users, new TypeReference<List<User>>() {});
     }
 
     public boolean loginUser(){
         Optional<User> foundUser = userList.stream().filter(user1 -> {
-            return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(),user1.getHashPassword());
+            return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(),user1.getHashedPassword());
         }).findFirst();
         return foundUser.isPresent();
 
@@ -60,7 +63,7 @@ public class UserBookingServices {
 
     public void fetchBookings(){
         Optional<User> userFetched = userList.stream().filter(user1 -> {
-            return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(), user1.getHashPassword());
+            return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(), user1.getHashedPassword());
         }).findFirst();
         userFetched.ifPresent(User::printTickets);
     }
